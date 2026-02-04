@@ -302,6 +302,10 @@
   color: rgba(255, 232, 204, 0.85);
 }
 
+.overview__back {
+  margin-top: 1.5rem;
+}
+
 .notes__list {
   list-style: none;
   padding: 0;

@@ -5,6 +5,7 @@ import './App.css'
 const PUZZLES = [
   {
     id: 1,
+    theme: 'Olsberg',
     title: 'Tor der Vier',
     story:
       'Nebel zieht durch die Schluchten. Eine Steintafel fordert dich auf, den Ort zu benennen, der dich umgibt.',
@@ -19,6 +20,7 @@ const PUZZLES = [
   },
   {
     id: 2,
+    theme: 'Olsberg',
     title: 'Anagramm der Tafel',
     story:
       'Die Buchstaben sind verrutscht, als haetten Wind und Wetter sie neu sortiert.',
@@ -28,6 +30,7 @@ const PUZZLES = [
   },
   {
     id: 3,
+    theme: 'Olsberg',
     title: 'Zahlenschrift',
     story: 'Die Runen sehen aus wie Zahlen. Du erinnerst dich an A1Z26.',
     prompt: 'Loese 6-5-12-19 (A=1, B=2, ...).',
@@ -36,6 +39,7 @@ const PUZZLES = [
   },
   {
     id: 4,
+    theme: 'Olsberg',
     title: 'Steinkammer',
     story:
       'Eine Truhe verlangt nach einer Zahl, die direkt vor dir steht.',
@@ -45,6 +49,7 @@ const PUZZLES = [
   },
   {
     id: 5,
+    theme: 'Olsberg',
     title: 'Pfadfinder',
     story:
       'Der letzte Verschluss oeffnet sich nur fuer ein Wort, das jeden Wanderer begleitet.',
@@ -54,12 +59,53 @@ const PUZZLES = [
   },
   {
     id: 6,
+    theme: 'Olsberg',
     title: 'Finales Schloss',
     story:
       'Der Mechanismus summt. Ein einziges Wort fehlt, dann gibt das Tor nach.',
     prompt: 'Ich oeffne alles, beginne mit T und ende mit R.',
     answers: ['tor'],
     hint: 'Was oeffnet sich am Ende eines Escape Games?',
+  },
+  {
+    id: 7,
+    theme: 'Elleringhausen',
+    title: 'Dorf der Glocke',
+    story:
+      'Die Glocke schwingt, doch niemand laeuft. Der Hinweis versteckt sich im Klang.',
+    prompt: 'Wie viele Silben hat Elleringhausen?',
+    answers: ['5', 'fuenf'],
+    hint: 'El-le-ring-haus-en.',
+  },
+  {
+    id: 8,
+    theme: 'Elleringhausen',
+    title: 'Wegweiser',
+    story:
+      'Ein Wegweiser zeigt nach Westen. Die Buchstaben scheinen vertauscht.',
+    prompt: 'Entschluessel das Anagramm: SNAHEN',
+    answers: ['hasen'],
+    hint: 'Ein Tier mit langen Ohren.',
+  },
+  {
+    id: 9,
+    theme: 'Bigge',
+    title: 'Stille am Wasser',
+    story:
+      'Das Wasser ruht. Eine Tafel spricht vom grossen Becken und seiner Farbe.',
+    prompt: 'Wie nennt man einen grossen kuenstlichen See?',
+    answers: ['stausee', 'stau see'],
+    hint: 'Das Wort beginnt mit Stau.',
+  },
+  {
+    id: 10,
+    theme: 'Bigge',
+    title: 'Schleusenwort',
+    story:
+      'Die Schleuse laesst nur ein kurzes Wort durch, das fuer Verbindung steht.',
+    prompt: 'Ich bin kurz und verbinde zwei Ufer. Was bin ich?',
+    answers: ['bruecke', 'brueck'],
+    hint: 'Das Wort beginnt mit Brue.',
   },
 ]
 
@@ -75,26 +121,38 @@ function normalizeAnswer(value: string) {
 }
 
 function App() {
-  const [view, setView] = useState<'overview' | 'puzzle'>('overview')
+  const [view, setView] = useState<'themes' | 'overview' | 'puzzle'>('themes')
   const [stepIndex, setStepIndex] = useState(0)
   const [input, setInput] = useState('')
   const [attempts, setAttempts] = useState(0)
   const [solved, setSolved] = useState<Array<{ id: number; answer: string }>>([])
   const [feedback, setFeedback] = useState<string | null>(null)
   const [showHint, setShowHint] = useState(false)
+  const [activeTheme, setActiveTheme] = useState('Olsberg')
 
-  const puzzle = PUZZLES[stepIndex]
+  const themes = useMemo(() => ['Elleringhausen', 'Olsberg', 'Bigge'], [])
+  const themedPuzzles = useMemo(
+    () => PUZZLES.filter((entry) => entry.theme === activeTheme),
+    [activeTheme]
+  )
+  const puzzle = themedPuzzles[stepIndex]
   const solvedIds = useMemo(
     () => new Set(solved.map((entry) => entry.id)),
     [solved]
   )
-  const solvedCount = solvedIds.size
-  const isComplete = solvedCount >= PUZZLES.length
-  const progress = Math.min(solvedCount, PUZZLES.length)
-  const chapterLabel = puzzle
-    ? `Kapitel ${puzzle.id} von ${PUZZLES.length}`
-    : `Kapitel ${PUZZLES.length} von ${PUZZLES.length}`
-  const unlockedIndex = Math.min(solvedCount, PUZZLES.length - 1)
+  const chapterIndex = puzzle
+    ? Math.max(
+        themedPuzzles.findIndex((entry) => entry.id === puzzle.id),
+        0
+      )
+    : 0
+  const solvedCount = themedPuzzles.filter((entry) => solvedIds.has(entry.id)).length
+  const isComplete = solvedCount >= themedPuzzles.length && themedPuzzles.length > 0
+  const progress = Math.min(solvedCount, themedPuzzles.length)
+  const chapterLabel = themedPuzzles.length
+    ? `Kapitel ${chapterIndex + 1} von ${themedPuzzles.length}`
+    : 'Kapitel 0 von 0'
+  const unlockedIndex = Math.min(solvedCount, themedPuzzles.length - 1)
 
   const normalizedAnswers = useMemo(() => {
     if (!puzzle) {
@@ -123,7 +181,9 @@ function App() {
       setInput('')
       setAttempts(0)
       setShowHint(false)
-      setStepIndex((current) => Math.min(current + 1, PUZZLES.length - 1))
+      setStepIndex((current) =>
+        Math.min(current + 1, Math.max(themedPuzzles.length - 1, 0))
+      )
     } else {
       setAttempts((current) => current + 1)
       setFeedback('Noch nicht. Hoerst du den Wind? Versuch es erneut.')
@@ -137,7 +197,7 @@ function App() {
     setSolved([])
     setFeedback(null)
     setShowHint(false)
-    setView('overview')
+    setView('themes')
   }
 
   function handleSelectPuzzle(index: number) {
@@ -147,6 +207,16 @@ function App() {
     setFeedback(null)
     setShowHint(false)
     setView('puzzle')
+  }
+
+  function handleSelectTheme(theme: string) {
+    setActiveTheme(theme)
+    setStepIndex(0)
+    setInput('')
+    setAttempts(0)
+    setFeedback(null)
+    setShowHint(false)
+    setView('overview')
   }
 
   return (
@@ -161,8 +231,8 @@ function App() {
             Alles laeuft direkt im Browser.
           </p>
           <div className="hero__meta">
-            <span>6 Raetsel</span>
-            <span>8-12 Minuten</span>
+            <span>{themes.length} Orte</span>
+            <span>{themedPuzzles.length} Raetsel</span>
             <span>Nur dein Kopf</span>
           </div>
         </div>
@@ -173,10 +243,16 @@ function App() {
           <div className="card__header">
             <div>
               <p className="card__eyebrow">
-                {view === 'overview' ? 'Uebersicht' : chapterLabel}
+                {view === 'themes'
+                  ? 'Orte'
+                  : view === 'overview'
+                    ? `${activeTheme} · Uebersicht`
+                    : chapterLabel}
               </p>
               <h2>
-                {view === 'overview'
+                {view === 'themes'
+                  ? 'Waehle deinen Schauplatz'
+                  : view === 'overview'
                   ? 'Waehle dein naechstes Raetsel'
                   : puzzle?.title ?? 'Das Tor ist offen'}
               </h2>
@@ -187,11 +263,49 @@ function App() {
           <div className="progress">
             <div
               className="progress__bar"
-              style={{ width: `${(progress / PUZZLES.length) * 100}%` }}
+              style={{
+                width: themedPuzzles.length
+                  ? `${(progress / themedPuzzles.length) * 100}%`
+                  : '0%',
+              }}
             />
           </div>
 
-          {isComplete ? (
+          {view === 'themes' ? (
+            <div className="themes">
+              <p className="overview__lead">
+                Jeder Ort enthaelt eigene Raetsel. Waehle einen Schauplatz und
+                starte dein Abenteuer.
+              </p>
+              <div className="overview__grid">
+                {themes.map((theme) => {
+                  const total = PUZZLES.filter((entry) => entry.theme === theme).length
+                  const solvedForTheme = PUZZLES.filter(
+                    (entry) => entry.theme === theme && solvedIds.has(entry.id)
+                  ).length
+
+                  return (
+                    <button
+                      key={theme}
+                      className="overview__card"
+                      type="button"
+                      onClick={() => handleSelectTheme(theme)}
+                    >
+                      <div className="overview__top">
+                        <span className="overview__chapter">{theme}</span>
+                        <span className="overview__status overview__status--offen">
+                          {solvedForTheme} / {total} geloest
+                        </span>
+                      </div>
+                      <h3>Raetsel erkunden</h3>
+                      <p>Entdecke die Hinweise und oeffne die Tore dieses Ortes.</p>
+                      <span className="overview__cta">Ort waehlen</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ) : isComplete ? (
             <div className="finish">
               <p className="finish__eyebrow">Geschafft</p>
               <h3>Das Tor oeffnet sich. Du bist frei!</h3>
@@ -219,7 +333,7 @@ function App() {
                 oder mit dem naechsten Tor fortfahren.
               </p>
               <div className="overview__grid">
-                {PUZZLES.map((entry, index) => {
+                {themedPuzzles.map((entry, index) => {
                   const isSolved = solvedIds.has(entry.id)
                   const isUnlocked = index <= unlockedIndex
                   const status = isSolved ? 'Geloest' : isUnlocked ? 'Offen' : 'Verriegelt'
@@ -249,6 +363,13 @@ function App() {
                   )
                 })}
               </div>
+              <button
+                className="btn btn--ghost overview__back"
+                type="button"
+                onClick={() => setView('themes')}
+              >
+                Zur Ortsauswahl
+              </button>
             </div>
           ) : (
             <div className="puzzle">
@@ -298,7 +419,11 @@ function App() {
             </p>
           ) : (
             <ul className="notes__list">
-              {solved.map((entry, index) => (
+              {solved
+                .filter((entry) =>
+                  themedPuzzles.some((puzzleEntry) => puzzleEntry.id === entry.id)
+                )
+                .map((entry, index) => (
                 <li key={`${entry.id}-${index}`}>
                   <span className="notes__index">{index + 1}</span>
                   <span className="notes__entry">{entry.answer}</span>
@@ -312,7 +437,7 @@ function App() {
           <div className="inventory">
             <div>
               <span className="inventory__label">Steinfragmente</span>
-              <span className="inventory__value">{progress} / {PUZZLES.length}</span>
+              <span className="inventory__value">{progress} / {themedPuzzles.length}</span>
             </div>
             <div>
               <span className="inventory__label">Torstatus</span>
