@@ -5,7 +5,7 @@ import './App.css'
 const PUZZLES = [
   {
     id: 1,
-    theme: 'Olsberg',
+    theme: 'Bruchhausen',
     title: 'Tor der Vier',
     story:
       'Nebel zieht durch die Schluchten. Eine Steintafel fordert dich auf, den Ort zu benennen, der dich umgibt.',
@@ -20,7 +20,7 @@ const PUZZLES = [
   },
   {
     id: 2,
-    theme: 'Olsberg',
+    theme: 'Bruchhausen',
     title: 'Anagramm der Tafel',
     story:
       'Die Buchstaben sind verrutscht, als haetten Wind und Wetter sie neu sortiert.',
@@ -30,7 +30,7 @@ const PUZZLES = [
   },
   {
     id: 3,
-    theme: 'Olsberg',
+    theme: 'Bruchhausen',
     title: 'Zahlenschrift',
     story: 'Die Runen sehen aus wie Zahlen. Du erinnerst dich an A1Z26.',
     prompt: 'Loese 6-5-12-19 (A=1, B=2, ...).',
@@ -39,7 +39,7 @@ const PUZZLES = [
   },
   {
     id: 4,
-    theme: 'Olsberg',
+    theme: 'Bruchhausen',
     title: 'Steinkammer',
     story:
       'Eine Truhe verlangt nach einer Zahl, die direkt vor dir steht.',
@@ -49,7 +49,7 @@ const PUZZLES = [
   },
   {
     id: 5,
-    theme: 'Olsberg',
+    theme: 'Bruchhausen',
     title: 'Pfadfinder',
     story:
       'Der letzte Verschluss oeffnet sich nur fuer ein Wort, das jeden Wanderer begleitet.',
@@ -59,7 +59,7 @@ const PUZZLES = [
   },
   {
     id: 6,
-    theme: 'Olsberg',
+    theme: 'Bruchhausen',
     title: 'Finales Schloss',
     story:
       'Der Mechanismus summt. Ein einziges Wort fehlt, dann gibt das Tor nach.',
@@ -128,9 +128,12 @@ function App() {
   const [solved, setSolved] = useState<Array<{ id: number; answer: string }>>([])
   const [feedback, setFeedback] = useState<string | null>(null)
   const [showHint, setShowHint] = useState(false)
-  const [activeTheme, setActiveTheme] = useState('Olsberg')
+  const [activeTheme, setActiveTheme] = useState('Elleringhausen')
 
-  const themes = useMemo(() => ['Elleringhausen', 'Olsberg', 'Bigge'], [])
+  const themes = useMemo(
+    () => ['Elleringhausen', 'Olsberg', 'Bigge', 'Bruchhausen'],
+    []
+  )
   const themedPuzzles = useMemo(
     () => PUZZLES.filter((entry) => entry.theme === activeTheme),
     [activeTheme]
@@ -225,7 +228,7 @@ function App() {
         <div className="hero__glow" />
         <div className="hero__content">
           <p className="hero__eyebrow">Online Escape Game</p>
-          <h1>Bruchhauser Steine: Das Fluesternde Tor</h1>
+          <h1>Online Escape Game</h1>
           <p className="hero__lead">
             Loese 6 Raetsel, oeffne die steinernen Tore und entkomme dem Nebel.
             Alles laeuft direkt im Browser.
