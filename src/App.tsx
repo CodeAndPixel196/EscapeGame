@@ -75,19 +75,26 @@ function normalizeAnswer(value: string) {
 }
 
 function App() {
+  const [view, setView] = useState<'overview' | 'puzzle'>('overview')
   const [stepIndex, setStepIndex] = useState(0)
   const [input, setInput] = useState('')
   const [attempts, setAttempts] = useState(0)
-  const [solved, setSolved] = useState<string[]>([])
+  const [solved, setSolved] = useState<Array<{ id: number; answer: string }>>([])
   const [feedback, setFeedback] = useState<string | null>(null)
   const [showHint, setShowHint] = useState(false)
 
   const puzzle = PUZZLES[stepIndex]
-  const isComplete = stepIndex >= PUZZLES.length
-  const progress = Math.min(stepIndex, PUZZLES.length)
-  const chapterLabel = isComplete
-    ? `Kapitel ${PUZZLES.length} von ${PUZZLES.length}`
-    : `Kapitel ${progress + 1} von ${PUZZLES.length}`
+  const solvedIds = useMemo(
+    () => new Set(solved.map((entry) => entry.id)),
+    [solved]
+  )
+  const solvedCount = solvedIds.size
+  const isComplete = solvedCount >= PUZZLES.length
+  const progress = Math.min(solvedCount, PUZZLES.length)
+  const chapterLabel = puzzle
+    ? `Kapitel ${puzzle.id} von ${PUZZLES.length}`
+    : `Kapitel ${PUZZLES.length} von ${PUZZLES.length}`
+  const unlockedIndex = Math.min(solvedCount, PUZZLES.length - 1)
 
   const normalizedAnswers = useMemo(() => {
     if (!puzzle) {
@@ -106,12 +113,17 @@ function App() {
     const match = normalizedAnswers.includes(guess)
 
     if (match) {
-      setSolved((current) => [...current, puzzle.answers[0]])
+      setSolved((current) => {
+        if (current.some((entry) => entry.id === puzzle.id)) {
+          return current
+        }
+        return [...current, { id: puzzle.id, answer: puzzle.answers[0] }]
+      })
       setFeedback('Richtig! Das Tor gibt nach.')
       setInput('')
       setAttempts(0)
       setShowHint(false)
-      setStepIndex((current) => current + 1)
+      setStepIndex((current) => Math.min(current + 1, PUZZLES.length - 1))
     } else {
       setAttempts((current) => current + 1)
       setFeedback('Noch nicht. Hoerst du den Wind? Versuch es erneut.')
@@ -125,6 +137,16 @@ function App() {
     setSolved([])
     setFeedback(null)
     setShowHint(false)
+    setView('overview')
+  }
+
+  function handleSelectPuzzle(index: number) {
+    setStepIndex(index)
+    setInput('')
+    setAttempts(0)
+    setFeedback(null)
+    setShowHint(false)
+    setView('puzzle')
   }
 
   return (
@@ -150,10 +172,16 @@ function App() {
         <section className="card card--game">
           <div className="card__header">
             <div>
-              <p className="card__eyebrow">{chapterLabel}</p>
-              <h2>{puzzle?.title ?? 'Das Tor ist offen'}</h2>
+              <p className="card__eyebrow">
+                {view === 'overview' ? 'Uebersicht' : chapterLabel}
+              </p>
+              <h2>
+                {view === 'overview'
+                  ? 'Waehle dein naechstes Raetsel'
+                  : puzzle?.title ?? 'Das Tor ist offen'}
+              </h2>
             </div>
-            <div className="badge">Versuche: {attempts}</div>
+            {view === 'puzzle' && <div className="badge">Versuche: {attempts}</div>}
           </div>
 
           <div className="progress">
@@ -171,9 +199,56 @@ function App() {
                 Grossartig! Du hast alle Raetsel geloest und die Bruchhauser
                 Steine geben ihren Ausgang frei.
               </p>
-              <button className="btn btn--primary" type="button" onClick={handleReset}>
-                Nochmal spielen
-              </button>
+              <div className="finish__actions">
+                <button className="btn btn--primary" type="button" onClick={handleReset}>
+                  Nochmal spielen
+                </button>
+                <button
+                  className="btn btn--ghost"
+                  type="button"
+                  onClick={() => setView('overview')}
+                >
+                  Zur Uebersicht
+                </button>
+              </div>
+            </div>
+          ) : view === 'overview' ? (
+            <div className="overview">
+              <p className="overview__lead">
+                Du kannst alle bereits freigeschalteten Kapitel erneut spielen
+                oder mit dem naechsten Tor fortfahren.
+              </p>
+              <div className="overview__grid">
+                {PUZZLES.map((entry, index) => {
+                  const isSolved = solvedIds.has(entry.id)
+                  const isUnlocked = index <= unlockedIndex
+                  const status = isSolved ? 'Geloest' : isUnlocked ? 'Offen' : 'Verriegelt'
+
+                  return (
+                    <button
+                      key={entry.id}
+                      className={`overview__card${isUnlocked ? '' : ' overview__card--locked'}`}
+                      type="button"
+                      onClick={() => handleSelectPuzzle(index)}
+                      disabled={!isUnlocked}
+                    >
+                      <div className="overview__top">
+                        <span className="overview__chapter">
+                          Kapitel {entry.id}
+                        </span>
+                        <span className={`overview__status overview__status--${status.toLowerCase()}`}>
+                          {status}
+                        </span>
+                      </div>
+                      <h3>{entry.title}</h3>
+                      <p>{entry.story}</p>
+                      <span className="overview__cta">
+                        {isSolved ? 'Erneut spielen' : 'Raetsel starten'}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           ) : (
             <div className="puzzle">
@@ -203,6 +278,13 @@ function App() {
 
               {showHint && <div className="hint">Hinweis: {puzzle.hint}</div>}
               {feedback && <div className="feedback">{feedback}</div>}
+              <button
+                className="btn btn--ghost puzzle__overview"
+                type="button"
+                onClick={() => setView('overview')}
+              >
+                Zur Uebersicht
+              </button>
             </div>
           )}
         </section>
@@ -217,9 +299,9 @@ function App() {
           ) : (
             <ul className="notes__list">
               {solved.map((entry, index) => (
-                <li key={`${entry}-${index}`}>
+                <li key={`${entry.id}-${index}`}>
                   <span className="notes__index">{index + 1}</span>
-                  <span className="notes__entry">{entry}</span>
+                  <span className="notes__entry">{entry.answer}</span>
                 </li>
               ))}
             </ul>

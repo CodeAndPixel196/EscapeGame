@@ -210,6 +210,98 @@
   color: #d8fff1;
 }
 
+.puzzle__overview {
+  margin-top: 1.2rem;
+}
+
+.overview__lead {
+  color: rgba(248, 235, 215, 0.75);
+  margin: 0 0 1.5rem;
+}
+
+.overview__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.overview__card {
+  text-align: left;
+  background: rgba(12, 10, 8, 0.8);
+  border: 1px solid rgba(255, 210, 160, 0.2);
+  border-radius: 18px;
+  padding: 1.4rem;
+  color: #fff1dc;
+  transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.overview__card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 202, 136, 0.4);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
+}
+
+.overview__card--locked {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.overview__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.overview__chapter {
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  font-size: 0.65rem;
+  color: rgba(245, 213, 174, 0.7);
+}
+
+.overview__status {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 220, 180, 0.35);
+  color: rgba(255, 232, 204, 0.9);
+}
+
+.overview__status--geloest {
+  border-color: rgba(97, 210, 176, 0.5);
+  color: rgba(180, 255, 230, 0.9);
+}
+
+.overview__status--offen {
+  border-color: rgba(255, 201, 125, 0.6);
+  color: rgba(255, 232, 204, 0.95);
+}
+
+.overview__status--verriegelt {
+  border-color: rgba(255, 220, 180, 0.2);
+  color: rgba(255, 232, 204, 0.6);
+}
+
+.overview__card h3 {
+  margin: 0 0 0.6rem;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+}
+
+.overview__card p {
+  margin: 0 0 1rem;
+  color: rgba(248, 235, 215, 0.75);
+}
+
+.overview__cta {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  color: rgba(255, 232, 204, 0.85);
+}
+
 .notes__list {
   list-style: none;
   padding: 0;
@@ -277,6 +369,13 @@
 .finish h3 {
   font-size: 1.6rem;
   margin-top: 0.6rem;
+}
+
+.finish__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.6rem;
 }
 
 .finish__eyebrow {
