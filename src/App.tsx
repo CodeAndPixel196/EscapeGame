@@ -308,27 +308,6 @@ function App() {
                 })}
               </div>
             </div>
-          ) : isComplete ? (
-            <div className="finish">
-              <p className="finish__eyebrow">Geschafft</p>
-              <h3>Das Tor oeffnet sich. Du bist frei!</h3>
-              <p>
-                Grossartig! Du hast alle Raetsel geloest und die Bruchhauser
-                Steine geben ihren Ausgang frei.
-              </p>
-              <div className="finish__actions">
-                <button className="btn btn--primary" type="button" onClick={handleReset}>
-                  Nochmal spielen
-                </button>
-                <button
-                  className="btn btn--ghost"
-                  type="button"
-                  onClick={() => setView('overview')}
-                >
-                  Zur Uebersicht
-                </button>
-              </div>
-            </div>
           ) : view === 'overview' ? (
             <div className="overview">
               <p className="overview__lead">
@@ -373,6 +352,27 @@ function App() {
               >
                 Zur Ortsauswahl
               </button>
+            </div>
+          ) : isComplete ? (
+            <div className="finish">
+              <p className="finish__eyebrow">Geschafft</p>
+              <h3>Das Tor oeffnet sich. Du bist frei!</h3>
+              <p>
+                Grossartig! Du hast alle Raetsel geloest und die Bruchhauser
+                Steine geben ihren Ausgang frei.
+              </p>
+              <div className="finish__actions">
+                <button className="btn btn--primary" type="button" onClick={handleReset}>
+                  Nochmal spielen
+                </button>
+                <button
+                  className="btn btn--ghost"
+                  type="button"
+                  onClick={() => setView('overview')}
+                >
+                  Zur Uebersicht
+                </button>
+              </div>
             </div>
           ) : (
             <div className="puzzle">
